@@ -4,15 +4,15 @@ import type { Attempt, Confidence } from "./types";
 const rows: [string, string, number, Confidence][] = [
   // id, selected, seconds, confidence
   ["q1", "b", 32, "sure"],
-  ["q2", "c", 61, "sure"], // misconception — added masses
+  ["q2", "c", 61, "sure"], // revisit concept — added masses
   ["q3", "a", 118, "unsure"], // concept gap — n-factor
   ["q4", "c", 28, "sure"],
   ["q5", "d", 58, "sure"],
-  ["q6", "a", 96, "unsure"], // lucky guess
+  ["q6", "a", 96, "unsure"], // needs confirmation
   ["q7", "b", 30, "sure"],
-  ["q8", "a", 92, "sure"], // calculation slip, sure → misconception flag
+  ["q8", "a", 92, "sure"], // calculation slip, sure → revisit concept flag
   ["q9", "b", 112, "sure"], // correct but slow
-  ["q10", "c", 52, "unsure"], // correct, slow, lucky
+  ["q10", "c", 52, "unsure"], // correct, slow, needs confirmation
   ["q11", "a", 70, "sure"], // misread, sure
   ["q12", "c", 131, "unsure"], // calculation slip
   ["q13", "d", 22, "sure"],

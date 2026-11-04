@@ -19,7 +19,7 @@ function Intro({ onStart }: { onStart: (name: string) => void }) {
   return (
     <div className="mx-auto max-w-xl px-4 pt-6 pb-16 sm:px-6">
       <p className="text-xs font-bold tracking-[0.16em] text-teal uppercase">{bank.level}</p>
-      <h1 className="mt-2 text-3xl font-bold text-navy sm:text-4xl">Chemistry diagnostic</h1>
+      <h1 className="mt-2 text-3xl font-bold text-navy sm:text-4xl">Chemistry progress check</h1>
       <p className="mt-3 leading-relaxed text-muted">
         15 questions across Mole concept, Atomic structure, Thermodynamics, Chemical equilibrium and GOC. They get
         harder as you go.
@@ -27,8 +27,8 @@ function Intro({ onStart }: { onStart: (name: string) => void }) {
       <ul className="mt-6 space-y-3 rounded-2xl bg-white p-5 ring-1 ring-paper-300">
         {[
           ["One question at a time", "No going back — answer as you would in the exam."],
-          ["Each question is timed", "The clock is for diagnosis, not pressure. There is no cut-off."],
-          ["Tell us if you're sure", "Mark Sure or Unsure honestly. It helps us find lucky guesses and misconceptions."],
+          ["Each question is timed", "The clock helps us plan your sessions — there is no pressure and no cut-off."],
+          ["Tell us if you're sure", "Mark Sure or Unsure honestly. It helps your tutor see which ideas are secure and which need confirming."],
         ].map(([t, d]) => (
           <li key={t} className="flex gap-3">
             <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-saffron" />

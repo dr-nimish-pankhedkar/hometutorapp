@@ -6,7 +6,7 @@ import type { TopicResult } from "@/lib/types";
 export const statusColor = {
   Strong: "#1F6B60",
   "On track": "#E0892B",
-  Focus: "#B5473A",
+  "Focus area": "#B5473A",
 } as const;
 
 export function MasteryChart({ topics }: { topics: TopicResult[] }) {

@@ -12,7 +12,7 @@ const subjects = [
   },
   {
     name: "Chemistry",
-    blurb: "Physical, organic & inorganic — 15-question diagnostic",
+    blurb: "Physical, organic & inorganic — 15-question progress check",
     active: true,
     glyph: (
       <>
@@ -50,18 +50,18 @@ const team = [
 const steps = [
   {
     n: "01",
-    title: "Diagnose",
-    body: "A 15-minute adaptive test records not just right or wrong, but time taken and how sure the student felt.",
+    title: "Analyse",
+    body: "A 15-minute progress check records each answer, the time taken and how sure the student felt.",
   },
   {
     n: "02",
     title: "Pinpoint",
-    body: "Every wrong option is mapped to a cause — concept gap, calculation slip or misread — at the sub-concept level.",
+    body: "Every answer choice is mapped to what it tells us — a concept to revisit, a calculation slip, or a cue to read the question again.",
   },
   {
     n: "03",
     title: "Target",
-    body: "Your tutor gets a two-week focus plan, so every home-tuition hour goes where it moves the score most.",
+    body: "Your tutor gets a two-week plan that builds on strengths, so every home-tuition hour moves the score forward.",
   },
 ];
 
@@ -79,7 +79,7 @@ function PreviewCard() {
       <div className="rounded-2xl border border-paper-300 bg-white p-6 shadow-[0_20px_50px_-20px_rgba(22,35,63,0.35)]">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Diagnostic report</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Progress report</p>
             <p className="font-display mt-1 text-lg font-bold text-navy">Aarav · Chemistry</p>
           </div>
           <div className="text-right">
@@ -102,9 +102,9 @@ function PreviewCard() {
           ))}
         </div>
         <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold">
-          <span className="rounded-full bg-rose-100 px-2.5 py-1 text-rose">3 misconceptions</span>
-          <span className="rounded-full bg-saffron-100 px-2.5 py-1 text-saffron-600">2 lucky guesses</span>
-          <span className="rounded-full bg-teal-100 px-2.5 py-1 text-teal">Focus: Equilibrium · Mole</span>
+          <span className="rounded-full bg-rose-100 px-2.5 py-1 text-rose">3 concepts to revisit</span>
+          <span className="rounded-full bg-saffron-100 px-2.5 py-1 text-saffron-600">2 to confirm</span>
+          <span className="rounded-full bg-teal-100 px-2.5 py-1 text-teal">Next: Equilibrium · Mole</span>
         </div>
       </div>
     </div>
@@ -132,20 +132,20 @@ export default function Home() {
             <span className="h-1.5 w-1.5 rounded-full bg-teal" /> AI-enabled home tuition · JEE &amp; NEET
           </p>
           <h1 className="mt-5 text-[2.35rem] leading-[1.08] font-bold text-navy sm:text-5xl lg:text-[3.6rem]">
-            Every student diagnosed.
+            Every student understood.
             <br />
-            <span className="text-saffron">Every hour targeted.</span>
+            <span className="text-saffron">Every hour well spent.</span>
           </h1>
           <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted">
-            Ekagra pairs IIT-trained subject experts with a diagnostic engine that finds the exact sub-concepts
-            holding a student back — so home tuition stops being guesswork.
+            AI-enabled home tuition for Physics, Chemistry, Maths and Biology — taught by IIT, NIT and medical
+            specialists.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
             <Link
               href="/test"
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-navy px-6 py-3.5 text-base font-bold text-paper shadow-lg shadow-navy/20 transition hover:bg-navy-700"
             >
-              Take a diagnostic test
+              Take a progress check
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
                 <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -162,7 +162,7 @@ export default function Home() {
           <div className="rule w-full max-w-[220px]" />
           <h2 className="mt-4 text-3xl font-bold text-navy">Four subjects. One method.</h2>
           <p className="mt-2 max-w-2xl text-muted">
-            Chemistry is live for this preview. Physics, Maths and Biology diagnostics follow the same engine.
+            Chemistry is live for this preview. Physics, Maths and Biology progress checks follow the same approach.
           </p>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {subjects.map((s) => {
@@ -185,7 +185,7 @@ export default function Home() {
                   <h3 className={`mt-5 text-xl font-bold ${s.active ? "text-navy" : "text-navy/50"}`}>{s.name}</h3>
                   <p className={`mt-1 text-sm ${s.active ? "text-muted" : "text-muted/70"}`}>{s.blurb}</p>
                   {s.active && (
-                    <p className="mt-4 text-sm font-bold text-saffron-600 group-hover:underline">Start diagnostic →</p>
+                    <p className="mt-4 text-sm font-bold text-saffron-600 group-hover:underline">Start progress check →</p>
                   )}
                 </>
               );
@@ -210,7 +210,7 @@ export default function Home() {
       {/* How it works */}
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         <div className="rule w-full max-w-[220px]" />
-        <h2 className="mt-4 text-3xl font-bold text-navy">How a diagnosis works</h2>
+        <h2 className="mt-4 text-3xl font-bold text-navy">How a progress check works</h2>
         <div className="mt-8 grid gap-6 md:grid-cols-3">
           {steps.map((s) => (
             <div key={s.n} className="rounded-2xl bg-white p-6 ring-1 ring-paper-300">
@@ -228,7 +228,7 @@ export default function Home() {
           <p className="text-xs font-bold tracking-[0.18em] text-saffron uppercase">The faculty</p>
           <h2 className="mt-3 text-3xl font-bold">Taught by people who have cracked it</h2>
           <p className="mt-2 max-w-2xl text-paper/70">
-            Each subject is led by an expert who designs its diagnostic and trains the tutors who deliver it.
+            Each subject is led by an expert who designs its progress check and trains the tutors who deliver it.
           </p>
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {team.map((m) => (
@@ -251,13 +251,13 @@ export default function Home() {
 
       {/* CTA */}
       <section className="mx-auto max-w-6xl px-4 py-16 text-center sm:px-6">
-        <h2 className="text-3xl font-bold text-navy">See what a diagnosis reveals</h2>
+        <h2 className="text-3xl font-bold text-navy">See what a progress check reveals</h2>
         <p className="mx-auto mt-2 max-w-xl text-muted">
-          Take the Chemistry diagnostic yourself — the report is generated instantly in your browser.
+          Take the Chemistry progress check yourself — the report is generated instantly in your browser.
         </p>
         <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
           <Link href="/test" className="rounded-xl bg-saffron px-6 py-3.5 font-bold text-white transition hover:bg-saffron-600">
-            Take a diagnostic test
+            Take a progress check
           </Link>
           <Link
             href="/report"

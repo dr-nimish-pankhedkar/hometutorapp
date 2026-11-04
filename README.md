@@ -1,8 +1,10 @@
-# Ekagra — demo web app
+# TutorIQ — demo web app
 
-**Every student diagnosed. Every hour targeted.**
+**Every student understood. Every hour well spent.**
 
-A proof of concept for Ekagra, an AI-enabled home-tuition platform for JEE/NEET students. A student takes a 15-question Chemistry diagnostic. The app then builds a report a parent can read and a tutor can act on. There is no login and no database. The browser computes everything, and the only server code is one optional route handler that calls Claude.
+AI-enabled home tuition for Physics, Chemistry, Maths and Biology — taught by IIT, NIT and medical specialists.
+
+A proof of concept for TutorIQ, an AI-enabled home-tuition platform for JEE/NEET students. A student takes a 15-question Chemistry progress check. The app then builds a report a parent can read and a tutor can act on. There is no login and no database. The browser computes everything, and the only server code is one optional route handler that calls Claude.
 
 Stack: Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · Recharts · Anthropic TypeScript SDK.
 
@@ -18,12 +20,13 @@ Stack: Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · Recharts · A
 ### What the report computes (`lib/analysis.ts`)
 
 - **Overall score** and **mastery % per topic**, weighted by difficulty (easy ×1, medium ×2, hard ×3), shown as a bar chart
-- **Status per topic:** Strong ≥ 75%, On track 50–74%, Focus < 50%
-- **Speed flag:** a correct answer that took longer than the question's `targetSec` (45 s easy, 75 s medium, 105 s hard)
-- **Confidence flags:** *lucky guess* (correct but unsure) and *misconception* (wrong but sure)
-- **Error type** for each wrong answer. In the JSON, every wrong option is pre-labelled `concept gap`, `calculation slip` or `misread`, with a one-line reason
-- **Focus for the next 2 weeks:** the two weakest topics. Ties are broken by misconceptions, then by lucky guesses. The sub-concepts listed are the ones the student actually missed, then the syllabus list for that topic
-- **Parent summary:** built from a template, or written by Claude if a key is set
+- **Strengths** (shown first): Strong / On track topics, concepts answered correctly *and* marked sure, and how many correct answers came in at exam pace
+- **Status per topic:** Strong ≥ 75%, On track 50–74%, Focus area < 50%
+- **Build speed:** a correct answer that took longer than the question's `targetSec` (45 s easy, 75 s medium, 105 s hard)
+- **Confidence flags:** *Needs confirmation* (correct but marked unsure) and *Revisit concept* (incorrect but marked sure)
+- **Answer analysis** for each incorrect answer, shown as *Concept to revisit*, *Calculation slip* or *Read the question again*. In the JSON these are the keys `concept gap`, `calculation slip` and `misread`; `ERROR_LABEL` in `lib/types.ts` maps them to the wording people see
+- **Your next 2-week plan:** the two focus areas with the lowest mastery. Ties are broken by concepts to revisit, then by answers needing confirmation. The sub-concepts listed are the ones the student actually missed, then the syllabus list for that topic
+- **Parent summary:** strengths first, then focus areas, in encouraging language. Built from a template, or written by Claude if a key is set
 - **Download report as PDF:** calls `window.print()`, with print CSS tuned for A4
 
 ## Question bank
@@ -46,7 +49,7 @@ cp .env.example .env.local
 # then set ANTHROPIC_API_KEY=sk-ant-... in .env.local
 ```
 
-The model is `claude-opus-5-5`, run at low effort, and set in `app/api/summary/route.ts`. If the key is missing or invalid, or the API errors or refuses, the route returns the template summary, so the demo never breaks.
+The model is `claude-opus-5-5`, run at low effort, and set in `app/api/summary/route.ts`. Its prompt requires positive, growth-oriented language and bans words such as weak, poor, diagnose and deficient. If the key is missing or invalid, or the API errors or refuses, the route returns the template summary, so the demo never breaks.
 
 ## Deploy on Vercel
 
@@ -73,7 +76,7 @@ vercel env add ANTHROPIC_API_KEY
 ```
 app/
   page.tsx               landing
-  test/page.tsx          diagnostic test (client)
+  test/page.tsx          progress check (client)
   report/page.tsx        report (client)
   api/summary/route.ts   Claude-written parent summary (optional)
   layout.tsx, globals.css  fonts (Domine, Nunito Sans), colour tokens, print CSS
@@ -81,6 +84,10 @@ components/              logo/header, mastery chart
 data/questions.json      question bank
 lib/                     scoring, summary template, sample attempt, storage
 ```
+
+## Language guide
+
+All student- and parent-facing text is encouraging. Use *analyse / analysis / progress check*, *focus area*, *Revisit concept*, *Needs confirmation*, *Concept to revisit*, *Read the question again*. Avoid *diagnose*, *weak*, *misconception*, *lucky guess* and other negative or clinical words. Chemistry terms inside the question bank (for example "weak base") are subject vocabulary and stay as they are.
 
 Design tokens: navy `#16233F`, paper `#F7F4EC`, saffron `#E0892B`, teal `#1F6B60`.
 

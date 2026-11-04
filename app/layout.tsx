@@ -6,9 +6,9 @@ const domine = Domine({ subsets: ["latin"], variable: "--font-domine", display: 
 const nunito = Nunito_Sans({ subsets: ["latin"], variable: "--font-nunito", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Ekagra — Every student diagnosed. Every hour targeted.",
+  title: "TutorIQ — Every student understood. Every hour well spent.",
   description:
-    "AI-enabled home tuition for JEE & NEET. A 15-minute diagnostic pinpoints exactly what to teach next in Physics, Chemistry, Maths and Biology.",
+    "AI-enabled home tuition for Physics, Chemistry, Maths and Biology — taught by IIT, NIT and medical specialists. A 15-minute progress check shows exactly what to teach next for JEE & NEET.",
 };
 
 export const viewport: Viewport = {

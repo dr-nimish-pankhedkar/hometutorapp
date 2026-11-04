@@ -9,18 +9,18 @@ import { topicById } from "@/lib/bank";
 import { sampleAttempt } from "@/lib/sample";
 import { loadAttempt } from "@/lib/storage";
 import { templateSummary, toSummaryInput } from "@/lib/summary";
-import type { Attempt, ErrorType, TopicStatus } from "@/lib/types";
+import { ERROR_LABEL, type Attempt, type ErrorType, type TopicStatus } from "@/lib/types";
 
 const statusPill: Record<TopicStatus, string> = {
   Strong: "bg-teal-100 text-teal",
   "On track": "bg-saffron-100 text-saffron-600",
-  Focus: "bg-rose-100 text-rose",
+  "Focus area": "bg-rose-100 text-rose",
 };
 
 const errorMeta: Record<ErrorType, { label: string; hint: string; cls: string }> = {
-  "concept gap": { label: "Concept gap", hint: "Needs re-teaching", cls: "bg-rose-100 text-rose" },
-  "calculation slip": { label: "Calculation slip", hint: "Needs careful practice", cls: "bg-saffron-100 text-saffron-600" },
-  misread: { label: "Misread", hint: "Needs exam technique", cls: "bg-paper-200 text-navy" },
+  "concept gap": { label: ERROR_LABEL["concept gap"], hint: "A short re-teach will secure it", cls: "bg-rose-100 text-rose" },
+  "calculation slip": { label: ERROR_LABEL["calculation slip"], hint: "Method is right — check each step", cls: "bg-saffron-100 text-saffron-600" },
+  misread: { label: ERROR_LABEL.misread, hint: "Underline what is being asked", cls: "bg-paper-200 text-navy" },
 };
 
 function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
@@ -135,7 +135,7 @@ export default function ReportPage() {
           <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-[11px] font-bold tracking-[0.16em] text-teal uppercase">
-                Ekagra diagnostic report · Chemistry
+                TutorIQ progress report · Chemistry
               </p>
               <h1 className="mt-1.5 text-3xl font-bold text-navy sm:text-4xl">{name}</h1>
               <p className="mt-1 text-sm text-muted">
@@ -152,9 +152,55 @@ export default function ReportPage() {
           </div>
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Stat label="Total time" value={fmtTime(report.totalTimeSec)} sub={`avg ${fmtTime(report.totalTimeSec / report.total)} / question`} />
-            <Stat label="Misconceptions" value={report.misconceptions.length} sub="wrong but sure" />
-            <Stat label="Lucky guesses" value={report.luckyGuesses.length} sub="right but unsure" />
-            <Stat label="Speed flags" value={report.slowTopics.length} sub="topics slower than target" />
+            <Stat label="Revisit concept" value={report.revisitConcepts.length} sub="marked sure, worth a second look" />
+            <Stat label="Needs confirmation" value={report.needsConfirmation.length} sub="right, but marked unsure" />
+            <Stat label="Build speed" value={report.slowTopics.length} sub="topics to practise against the clock" />
+          </div>
+        </Card>
+
+        {/* Strengths — always first, before any focus areas */}
+        <Card className="border-l-4 border-teal">
+          <SectionTitle kicker="Strengths" title="What's already going well" />
+          <div className="grid gap-4 md:grid-cols-[1.2fr_1fr] print:grid-cols-[1.2fr_1fr]">
+            <div>
+              {report.strengths.topics.length > 0 ? (
+                <ul className="space-y-2.5">
+                  {report.strengths.topics.map((t) => (
+                    <li key={t.topic.id} className="flex items-center justify-between gap-3 rounded-xl bg-teal-100/60 px-4 py-3">
+                      <span className="flex items-center gap-2.5 font-bold text-navy">
+                        <StarIcon />
+                        {t.topic.name}
+                      </span>
+                      <span className="text-sm font-bold text-teal">
+                        {t.mastery}% · {t.status}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="rounded-xl bg-teal-100/60 px-4 py-3 text-sm text-teal">
+                  Every question was attempted, which gives the tutor a complete picture to build from.
+                </p>
+              )}
+              <p className="mt-3 text-sm text-muted">
+                <span className="font-bold text-navy">{report.strengths.onPace}</span> correct{" "}
+                {report.strengths.onPace === 1 ? "answer" : "answers"} at exam pace
+              </p>
+            </div>
+            <div>
+              <p className="text-[11px] font-bold tracking-wide text-muted uppercase">Secure concepts (correct &amp; sure)</p>
+              {report.strengths.secureConcepts.length > 0 ? (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {report.strengths.secureConcepts.map((c) => (
+                    <span key={c.concept} className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-teal ring-1 ring-teal/30">
+                      {c.concept}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-2 text-sm text-muted">Confidence grows quickly with practice — the plan below builds it.</p>
+              )}
+            </div>
           </div>
         </Card>
 
@@ -201,7 +247,7 @@ export default function ReportPage() {
                       {t.correct}/{t.total} correct · avg {fmtTime(t.avgTimeSec)}
                       {t.slowCorrect.length > 0 && (
                         <span className="ml-1.5 inline-flex items-center gap-1 font-semibold text-saffron-600">
-                          · <ClockIcon /> slow
+                          · <ClockIcon /> build speed
                         </span>
                       )}
                     </p>
@@ -215,12 +261,12 @@ export default function ReportPage() {
           </Card>
         </div>
 
-        {/* Focus */}
+        {/* Plan */}
         <Card className="border-l-4 border-saffron">
           <SectionTitle
             kicker="Tutor plan"
-            title="Focus for the next 2 weeks"
-            sub="The two weakest topics, with the sub-concepts to cover first."
+            title="Your next 2-week plan"
+            sub="Two focus areas where focused sessions will lift the score most, with the sub-concepts to cover first."
           />
           <div className="grid gap-4 md:grid-cols-2 print:grid-cols-2">
             {report.focus.map((f, i) => (
@@ -230,7 +276,7 @@ export default function ReportPage() {
                     <span className="mr-2 text-saffron">Week {i + 1}</span>
                     {f.topic.name}
                   </p>
-                  <span className="text-sm font-bold text-rose">{f.mastery}%</span>
+                  <span className="text-sm font-bold text-navy">{f.mastery}%</span>
                 </div>
                 <p className="text-xs text-muted">{f.topic.chapter}</p>
                 <ol className="mt-3 space-y-2">
@@ -251,7 +297,7 @@ export default function ReportPage() {
         {/* Speed + confidence */}
         <div className="grid gap-5 md:grid-cols-3 print:grid-cols-3">
           <Card>
-            <SectionTitle kicker="Speed" title="Right, but slow" sub="Correct answers that took longer than the target time." />
+            <SectionTitle kicker="Speed" title="Right — now build speed" sub="Correct answers that can get quicker with timed practice." />
             {report.slowTopics.length === 0 ? (
               <Empty text="Every correct answer was within exam pace." />
             ) : (
@@ -270,12 +316,12 @@ export default function ReportPage() {
             )}
           </Card>
           <Card>
-            <SectionTitle kicker="Confidence" title="Lucky guesses" sub="Correct, but marked unsure — not yet secure." />
-            {report.luckyGuesses.length === 0 ? (
-              <Empty text="No lucky guesses — correct answers were confident." />
+            <SectionTitle kicker="Confidence" title="Needs confirmation" sub="Correct, but marked unsure — a quick recap will make these secure." />
+            {report.needsConfirmation.length === 0 ? (
+              <Empty text="Every correct answer was a confident one." />
             ) : (
               <ul className="space-y-3">
-                {report.luckyGuesses.map(({ question, timeSec }) => (
+                {report.needsConfirmation.map(({ question, timeSec }) => (
                   <FlagItem
                     key={question.id}
                     topic={topicById.get(question.topic)!.name}
@@ -287,12 +333,12 @@ export default function ReportPage() {
             )}
           </Card>
           <Card>
-            <SectionTitle kicker="Confidence" title="Misconceptions" sub="Wrong, but marked sure — tackle these first." />
-            {report.misconceptions.length === 0 ? (
-              <Empty text="No confident wrong answers." />
+            <SectionTitle kicker="Confidence" title="Revisit concept" sub="Marked sure, but worth a second look — these come first in the plan." />
+            {report.revisitConcepts.length === 0 ? (
+              <Empty text="Nothing to revisit — confidence matched the answers." />
             ) : (
               <ul className="space-y-3">
-                {report.misconceptions.map((w) => (
+                {report.revisitConcepts.map((w) => (
                   <FlagItem
                     key={w.question.id}
                     topic={topicById.get(w.question.topic)!.name}
@@ -306,12 +352,12 @@ export default function ReportPage() {
           </Card>
         </div>
 
-        {/* Error analysis */}
+        {/* Answer analysis */}
         <Card>
           <SectionTitle
-            kicker="Error analysis"
-            title="Why each answer went wrong"
-            sub="Every wrong option in the question bank is pre-labelled with the mistake it reveals."
+            kicker="Answer analysis"
+            title="Learning from each answer"
+            sub="Every answer choice is pre-labelled with what it tells us, so the tutor knows exactly what to do next."
           />
           <div className="grid grid-cols-3 gap-3">
             {(Object.keys(errorMeta) as ErrorType[]).map((k) => {
@@ -334,7 +380,7 @@ export default function ReportPage() {
 
           {report.wrong.length === 0 ? (
             <div className="mt-5">
-              <Empty text="A perfect score — no wrong answers to analyse." />
+              <Empty text="A perfect score — every answer was correct." />
             </div>
           ) : (
             <ul className="mt-5 space-y-3">
@@ -348,17 +394,17 @@ export default function ReportPage() {
                         {topicById.get(w.question.topic)!.name} · {w.question.concept}
                       </span>
                       {w.confidence === "sure" && (
-                        <span className="rounded-full bg-rose px-2 py-0.5 text-[11px] font-bold text-white">Marked sure</span>
+                        <span className="rounded-full bg-navy px-2 py-0.5 text-[11px] font-bold text-paper">Marked sure</span>
                       )}
                     </div>
                     <p className="mt-2 text-sm font-semibold text-navy">{w.question.text}</p>
                     <div className="mt-2 grid gap-1 text-sm sm:grid-cols-2">
                       <p>
-                        <span className="text-muted">Chose: </span>
-                        <span className="font-semibold text-rose line-through decoration-rose/40">{w.chosen.text}</span>
+                        <span className="text-muted">Answered: </span>
+                        <span className="font-semibold text-rose">{w.chosen.text}</span>
                       </p>
                       <p>
-                        <span className="text-muted">Correct: </span>
+                        <span className="text-muted">Answer: </span>
                         <span className="font-semibold text-teal">{w.correct.text}</span>
                       </p>
                     </div>
@@ -386,7 +432,7 @@ export default function ReportPage() {
         </div>
 
         <p className="hidden pt-4 text-center text-xs text-muted print:block">
-          Ekagra · AI-enabled home tuition for JEE &amp; NEET · Demo report
+          TutorIQ · AI-enabled home tuition for JEE &amp; NEET · Demo report
         </p>
       </div>
     </main>
@@ -398,6 +444,14 @@ function ClockIcon() {
     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden>
       <circle cx="12" cy="12" r="9" />
       <path d="M12 7v5l3 2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function StarIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="#1F6B60" aria-hidden>
+      <path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" />
     </svg>
   );
 }

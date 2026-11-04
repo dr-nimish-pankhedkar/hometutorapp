@@ -1,5 +1,12 @@
 export type Difficulty = "easy" | "medium" | "hard";
+/** Keys used in data/questions.json. Show them to people via ERROR_LABEL, never raw. */
 export type ErrorType = "concept gap" | "calculation slip" | "misread";
+
+export const ERROR_LABEL: Record<ErrorType, string> = {
+  "concept gap": "Concept to revisit",
+  "calculation slip": "Calculation slip",
+  misread: "Read the question again",
+};
 export type Confidence = "sure" | "unsure";
 
 export interface Option {
@@ -50,7 +57,7 @@ export interface Attempt {
   isSample?: boolean;
 }
 
-export type TopicStatus = "Strong" | "On track" | "Focus";
+export type TopicStatus = "Strong" | "On track" | "Focus area";
 
 export interface TopicResult {
   topic: Topic;
@@ -60,8 +67,8 @@ export interface TopicResult {
   status: TopicStatus;
   avgTimeSec: number;
   slowCorrect: { question: Question; timeSec: number }[];
-  luckyGuesses: Question[];
-  misconceptions: Question[];
+  needsConfirmation: Question[];
+  revisitConcepts: Question[];
 }
 
 export interface WrongAnswer {
@@ -81,8 +88,13 @@ export interface Report {
   topics: TopicResult[];
   wrong: WrongAnswer[];
   errorCounts: Record<ErrorType, number>;
-  luckyGuesses: { question: Question; timeSec: number }[];
-  misconceptions: WrongAnswer[];
+  needsConfirmation: { question: Question; timeSec: number }[];
+  revisitConcepts: WrongAnswer[];
   slowTopics: TopicResult[];
+  strengths: {
+    topics: TopicResult[]; // Strong / On track topics, best first (or the best single topic if none yet)
+    secureConcepts: { topic: string; concept: string }[]; // correct and marked "sure"
+    onPace: number; // correct answers within target time
+  };
   focus: { topic: Topic; mastery: number; subConcepts: string[] }[];
 }

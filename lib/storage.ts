@@ -1,6 +1,6 @@
 import type { Attempt } from "./types";
 
-const KEY = "ekagra:attempt";
+const KEY = "tutoriq:attempt";
 
 export function saveAttempt(a: Attempt) {
   try {

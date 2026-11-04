@@ -1,4 +1,5 @@
-import type { Report } from "./types";
+import { topicById } from "./bank";
+import { ERROR_LABEL, type ErrorType, type Report } from "./types";
 
 /** Compact, PII-light digest of a report — what the summary (template or Claude) is written from. */
 export interface SummaryInput {
@@ -6,11 +7,13 @@ export interface SummaryInput {
   score: number;
   total: number;
   percent: number;
-  topics: { name: string; mastery: number; status: string; slow: boolean }[];
-  errorCounts: Record<string, number>;
-  luckyGuesses: number;
-  misconceptions: { topic: string; concept: string }[];
-  focus: { topic: string; subConcepts: string[] }[];
+  strengths: { topics: string[]; secureConcepts: string[]; answersOnPace: number };
+  topics: { name: string; mastery: number; status: string; buildSpeed: boolean }[];
+  /** Keyed by friendly label: "Concept to revisit", "Calculation slip", "Read the question again" */
+  answerPatterns: Record<string, number>;
+  needsConfirmation: number;
+  revisitConcepts: { topic: string; concept: string }[];
+  nextTwoWeekPlan: { topic: string; subConcepts: string[] }[];
 }
 
 export function toSummaryInput(r: Report): SummaryInput {
@@ -19,19 +22,26 @@ export function toSummaryInput(r: Report): SummaryInput {
     score: r.score,
     total: r.total,
     percent: r.percent,
+    strengths: {
+      topics: r.strengths.topics.map((t) => t.topic.name),
+      secureConcepts: r.strengths.secureConcepts.slice(0, 4).map((c) => c.concept),
+      answersOnPace: r.strengths.onPace,
+    },
     topics: r.topics.map((t) => ({
       name: t.topic.name,
       mastery: t.mastery,
       status: t.status,
-      slow: t.slowCorrect.length > 0,
+      buildSpeed: t.slowCorrect.length > 0,
     })),
-    errorCounts: r.errorCounts,
-    luckyGuesses: r.luckyGuesses.length,
-    misconceptions: r.misconceptions.map((m) => ({
-      topic: r.topics.find((t) => t.topic.id === m.question.topic)!.topic.name,
+    answerPatterns: Object.fromEntries(
+      (Object.keys(r.errorCounts) as ErrorType[]).map((k) => [ERROR_LABEL[k], r.errorCounts[k]]),
+    ),
+    needsConfirmation: r.needsConfirmation.length,
+    revisitConcepts: r.revisitConcepts.map((m) => ({
+      topic: topicById.get(m.question.topic)!.name,
       concept: m.question.concept,
     })),
-    focus: r.focus.map((f) => ({ topic: f.topic.name, subConcepts: f.subConcepts.slice(0, 2) })),
+    nextTwoWeekPlan: r.focus.map((f) => ({ topic: f.topic.name, subConcepts: f.subConcepts.slice(0, 2) })),
   };
 }
 
@@ -40,36 +50,46 @@ function list(items: string[]) {
   return `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
 }
 
+/** Parent-facing paragraph: result → strengths → next 2-week plan → encouragement. */
 export function templateSummary(s: SummaryInput): string {
   const name = s.studentName || "Your child";
-  const strong = s.topics.filter((t) => t.status === "Strong").map((t) => t.name);
-  const focus = s.focus.map((f) => f.topic);
-  const slow = s.topics.filter((t) => t.slow && t.status !== "Focus").map((t) => t.name);
-  const dominant = Object.entries(s.errorCounts).sort((a, b) => b[1] - a[1])[0];
-
+  const they = s.studentName || "they";
   const parts: string[] = [];
+
   const tone =
-    s.percent >= 75 ? "a strong start" : s.percent >= 50 ? "a solid base to build on" : "a clear picture of where to begin";
-  parts.push(
-    `${name} scored ${s.score} out of ${s.total} (${s.percent}%) on the Chemistry diagnostic — ${tone}.`,
-  );
-  if (strong.length) parts.push(`${list(strong)} ${strong.length > 1 ? "are" : "is"} already a strength.`);
-  if (focus.length)
+    s.percent >= 75 ? "an excellent result" : s.percent >= 50 ? "a solid base to build on" : "a clear starting point for steady progress";
+  parts.push(`${name} answered ${s.score} of ${s.total} questions correctly (${s.percent}%) on the Chemistry progress check — ${tone}.`);
+
+  // Strengths first
+  const strong = s.strengths.topics;
+  if (strong.length) {
+    const secure = s.strengths.secureConcepts[0];
     parts.push(
-      `For the next two weeks, sessions will concentrate on ${list(focus)}, starting with “${s.focus[0].subConcepts[0]}”.`,
+      `${list(strong)} ${strong.length > 1 ? "are" : "is"} already going well${secure ? `, with confident, correct work on ${secure}` : ""}.`,
     );
-  if (dominant && dominant[1] > 0) {
-    const explain: Record<string, string> = {
-      "concept gap": "most mistakes point to specific gaps in understanding — exactly what one-to-one teaching fixes fastest",
-      "calculation slip": "most mistakes were calculation slips rather than gaps in understanding — careful, step-by-step practice will help",
-      misread: "most mistakes came from misreading the question, so we will build a habit of underlining what is asked",
-    };
-    parts.push(`${explain[dominant[0]][0].toUpperCase()}${explain[dominant[0]].slice(1)}.`);
+  } else {
+    parts.push(`${name} attempted every question, which gives the tutor a complete picture to plan from.`);
   }
-  if (s.misconceptions.length)
+  if (s.strengths.answersOnPace >= 3) parts.push(`${s.strengths.answersOnPace} correct answers came in at exam pace.`);
+
+  // Then focus areas, framed as the plan
+  const plan = s.nextTwoWeekPlan;
+  if (plan.length) {
     parts.push(
-      `${s.misconceptions.length} answer${s.misconceptions.length > 1 ? "s were" : " was"} marked “sure” but wrong — we will address ${s.misconceptions.length > 1 ? "these misconceptions" : "this misconception"} first.`,
+      `Over the next two weeks, sessions will build on this with ${list(plan.map((p) => p.topic))} as focus areas, beginning with “${plan[0].subConcepts[0]}”.`,
     );
-  if (slow.length) parts.push(`${list(slow)} answers were correct but slower than exam pace, so timed practice is planned.`);
+  }
+  if (s.revisitConcepts.length) {
+    parts.push(
+      `${s.revisitConcepts.length === 1 ? "One idea" : `${s.revisitConcepts.length} ideas`} ${they} felt sure about will be revisited early so ${s.revisitConcepts.length === 1 ? "it becomes" : "they become"} fully secure.`,
+    );
+  }
+  const closeCalls = (s.answerPatterns["Calculation slip"] ?? 0) + (s.answerPatterns["Read the question again"] ?? 0);
+  if (closeCalls >= 2) {
+    parts.push(`Several answers were very close — simple habits like checking units and re-reading the question will add marks quickly.`);
+  }
+  const speed = s.topics.filter((t) => t.buildSpeed && t.status !== "Focus area").map((t) => t.name);
+  if (speed.length) parts.push(`In ${list(speed)} the understanding is already there, and timed practice will build speed.`);
+
   return parts.join(" ");
 }
