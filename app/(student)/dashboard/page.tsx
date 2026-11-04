@@ -120,7 +120,7 @@ export default function Dashboard() {
         ))}
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <Panel>
           <Kicker>Chemistry</Kicker>
           <h2 className="text-xl font-bold text-navy sm:text-2xl">Where you are now</h2>

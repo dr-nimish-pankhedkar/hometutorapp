@@ -12,12 +12,3 @@ export function Logo({ light = false }: { light?: boolean }) {
     </Link>
   );
 }
-
-export function SiteHeader({ right }: { right?: React.ReactNode }) {
-  return (
-    <header className="no-print mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-5 sm:px-6">
-      <Logo />
-      {right}
-    </header>
-  );
-}

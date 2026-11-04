@@ -1,37 +1,54 @@
 "use client";
 
+import Link from "next/link";
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Logo } from "@/components/Brand";
-import { demoCredentials } from "@/lib/user";
+import type { Role } from "@/lib/user";
+
+const roleCopy: Record<Role, { title: string; sub: string; userLabel: string }> = {
+  student: {
+    title: "Student login",
+    sub: "Take progress checks, see your strengths and follow your 2-week plan.",
+    userLabel: "Student username",
+  },
+  faculty: {
+    title: "Faculty login",
+    sub: "See every student's progress, focus areas and reports in one place.",
+    userLabel: "Faculty username",
+  },
+};
 
 function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
+  const [role, setRole] = useState<Role>(params.get("as") === "faculty" ? "faculty" : "student");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const next = params.get("next");
-  const dest = next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
 
-  async function signIn(u: string, p: string) {
+  async function signIn(e: React.FormEvent) {
+    e.preventDefault();
     setBusy(true);
     setError(null);
     try {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: u, password: p }),
+        body: JSON.stringify({ username, password, role }),
       });
+      const d = await res.json().catch(() => null);
       if (!res.ok) {
-        const d = await res.json().catch(() => null);
         setError(d?.error ?? "Couldn't sign in. Please try again.");
         setBusy(false);
         return;
       }
-      router.replace(dest);
+      const home: string = d?.home ?? "/";
+      const safeNext = next && next.startsWith(home) && !next.startsWith("//") ? next : home;
+      router.replace(safeNext);
       router.refresh();
     } catch {
       setError("Couldn't reach the server. Check your connection and try again.");
@@ -39,21 +56,34 @@ function LoginForm() {
     }
   }
 
+  const copy = roleCopy[role];
+
   return (
     <div className="w-full max-w-sm">
-      <h1 className="text-3xl font-bold text-navy">Student login</h1>
-      <p className="mt-2 text-muted">Welcome back. Pick up where you left off.</p>
+      <div className="grid grid-cols-2 gap-1 rounded-xl bg-paper-200 p-1" role="tablist" aria-label="Login type">
+        {(["student", "faculty"] as const).map((r) => (
+          <button
+            key={r}
+            role="tab"
+            aria-selected={role === r}
+            onClick={() => {
+              setRole(r);
+              setError(null);
+            }}
+            className={`rounded-lg py-2.5 text-sm font-bold transition ${role === r ? "bg-white text-navy shadow" : "text-muted hover:text-navy"}`}
+          >
+            {r === "student" ? "Student" : "Faculty"}
+          </button>
+        ))}
+      </div>
 
-      <form
-        className="mt-8 space-y-4"
-        onSubmit={(e) => {
-          e.preventDefault();
-          signIn(username, password);
-        }}
-      >
+      <h1 className="mt-8 text-3xl font-bold text-navy">{copy.title}</h1>
+      <p className="mt-2 text-muted">{copy.sub}</p>
+
+      <form className="mt-8 space-y-4" onSubmit={signIn}>
         <div>
           <label htmlFor="username" className="text-sm font-bold text-navy">
-            Username
+            {copy.userLabel}
           </label>
           <input
             id="username"
@@ -92,28 +122,12 @@ function LoginForm() {
           {busy ? "Signing in…" : "Sign in"}
         </button>
       </form>
-
-      <div className="mt-8 rounded-2xl border border-dashed border-saffron bg-saffron-100/50 p-4">
-        <p className="text-[11px] font-bold tracking-[0.14em] text-saffron-600 uppercase">Demo account</p>
-        <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
-          <dt className="text-muted">Username</dt>
-          <dd className="font-mono font-semibold text-navy">{demoCredentials.username}</dd>
-          <dt className="text-muted">Password</dt>
-          <dd className="font-mono font-semibold text-navy">{demoCredentials.password}</dd>
-        </dl>
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => {
-            setUsername(demoCredentials.username);
-            setPassword(demoCredentials.password);
-            signIn(demoCredentials.username, demoCredentials.password);
-          }}
-          className="mt-3 w-full rounded-lg bg-white px-4 py-2.5 text-sm font-bold text-navy ring-1 ring-saffron/50 transition hover:ring-saffron disabled:opacity-60"
-        >
-          Sign in as Aarav (demo)
-        </button>
-      </div>
+      <p className="mt-6 text-sm text-muted">
+        Not enrolled yet?{" "}
+        <Link href="/#about" className="font-bold text-saffron-600 underline underline-offset-4">
+          Find out how TutorIQ works
+        </Link>
+      </p>
     </div>
   );
 }
@@ -133,15 +147,21 @@ export default function LoginPage() {
             <span className="text-saffron">Every hour well spent.</span>
           </h2>
           <p className="mt-4 max-w-md text-paper/70">
-            Take a progress check, see your strengths, and get a two-week plan your tutor builds every session around.
+            One platform for students and their tutors: progress checks, clear reports and a two-week plan built
+            around every student.
           </p>
         </div>
         <p className="text-sm text-paper/50">AI-enabled home tuition · JEE &amp; NEET</p>
       </aside>
 
       <section className="flex flex-col bg-paper px-4 py-6 sm:px-10">
-        <div className="md:hidden">
-          <Logo />
+        <div className="flex items-center justify-between">
+          <span className="md:hidden">
+            <Logo />
+          </span>
+          <Link href="/" className="ml-auto text-sm font-semibold text-muted hover:text-navy">
+            ← Back to site
+          </Link>
         </div>
         <div className="flex flex-1 items-center justify-center py-10">
           <Suspense fallback={null}>

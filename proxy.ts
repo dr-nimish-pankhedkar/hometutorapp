@@ -1,22 +1,44 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
+import { homeFor, type Role } from "@/lib/user";
 
-/** Student area is login-only; the login page bounces signed-in students to their dashboard. */
+const studentAreas = ["/dashboard", "/tests", "/results"];
+const facultyAreas = ["/faculty"];
+
+function areaRole(pathname: string): Role | null {
+  const under = (p: string) => pathname === p || pathname.startsWith(p + "/");
+  if (studentAreas.some(under)) return "student";
+  if (facultyAreas.some(under)) return "faculty";
+  return null;
+}
+
+/**
+ * Everything inside the platform needs a login, and each portal only opens for its own role.
+ * The public site (/) and /login stay open.
+ */
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
-  const user = verifySessionToken(request.cookies.get(SESSION_COOKIE)?.value);
+  const session = verifySessionToken(request.cookies.get(SESSION_COOKIE)?.value);
 
   if (pathname === "/login") {
-    return user ? NextResponse.redirect(new URL("/dashboard", request.url)) : NextResponse.next();
+    return session ? NextResponse.redirect(new URL(homeFor[session.role], request.url)) : NextResponse.next();
   }
-  if (!user) {
+
+  const needed = areaRole(pathname);
+  if (!needed) return NextResponse.next();
+
+  if (!session) {
     const url = new URL("/login", request.url);
+    url.searchParams.set("as", needed);
     url.searchParams.set("next", pathname + search);
     return NextResponse.redirect(url);
+  }
+  if (session.role !== needed) {
+    return NextResponse.redirect(new URL(homeFor[session.role], request.url));
   }
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/login", "/dashboard/:path*", "/tests/:path*", "/results/:path*"],
+  matcher: ["/login", "/dashboard/:path*", "/tests/:path*", "/results/:path*", "/faculty/:path*"],
 };

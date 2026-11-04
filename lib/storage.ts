@@ -9,7 +9,7 @@ import { student } from "./user";
  * Demo persistence: the student's attempts live in this browser's localStorage.
  * There is no database — clearing site data (or "Reset demo data") starts fresh.
  */
-const KEY = `tutoriq:attempts:${student.username}`;
+const KEY = `tutoriq:attempts:${student.id}`;
 const EVENT = "tutoriq:attempts-changed";
 
 let cacheRaw: string | null | undefined;
