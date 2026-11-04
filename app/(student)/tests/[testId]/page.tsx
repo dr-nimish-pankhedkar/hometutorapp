@@ -1,11 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { SiteHeader } from "@/components/Brand";
-import { bank, testQuestions, topicById } from "@/lib/bank";
-import { saveAttempt } from "@/lib/storage";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { bank, topicById } from "@/lib/bank";
+import { addAttempt, newAttemptId } from "@/lib/storage";
+import { getTest, type TestDef } from "@/lib/tests";
 import type { Confidence, Response } from "@/lib/types";
+import { student } from "@/lib/user";
 
 const letters = ["A", "B", "C", "D"];
 const diffStyle = {
@@ -14,15 +16,20 @@ const diffStyle = {
   hard: "bg-rose-100 text-rose",
 } as const;
 
-function Intro({ onStart }: { onStart: (name: string) => void }) {
-  const [name, setName] = useState("");
+function Intro({ test, onStart }: { test: TestDef; onStart: () => void }) {
+  const topicNames = Array.from(new Set(test.questions.map((q) => topicById.get(q.topic)!.name)));
   return (
-    <div className="mx-auto max-w-xl px-4 pt-6 pb-16 sm:px-6">
-      <p className="text-xs font-bold tracking-[0.16em] text-teal uppercase">{bank.level}</p>
-      <h1 className="mt-2 text-3xl font-bold text-navy sm:text-4xl">Chemistry progress check</h1>
+    <div className="mx-auto max-w-xl px-4 pt-8 pb-16 sm:px-6">
+      <Link href="/tests" className="text-sm font-semibold text-muted hover:text-navy">
+        ← All tests
+      </Link>
+      <p className="mt-6 text-xs font-bold tracking-[0.16em] text-teal uppercase">
+        {test.kind === "full" ? bank.level : "Quick topic check"}
+      </p>
+      <h1 className="mt-2 text-3xl font-bold text-navy sm:text-4xl">{test.title}</h1>
       <p className="mt-3 leading-relaxed text-muted">
-        15 questions across Mole concept, Atomic structure, Thermodynamics, Chemical equilibrium and GOC. They get
-        harder as you go.
+        {test.questions.length} questions{test.kind === "full" ? ` across ${topicNames.join(", ")}` : ` on ${test.subtitle}`}.
+        They get harder as you go. About {test.minutes} minutes.
       </p>
       <ul className="mt-6 space-y-3 rounded-2xl bg-white p-5 ring-1 ring-paper-300">
         {[
@@ -38,32 +45,13 @@ function Intro({ onStart }: { onStart: (name: string) => void }) {
           </li>
         ))}
       </ul>
-      <form
-        className="mt-6"
-        onSubmit={(e) => {
-          e.preventDefault();
-          onStart(name.trim());
-        }}
+      <button
+        type="button"
+        onClick={onStart}
+        className="mt-6 w-full rounded-xl bg-navy px-6 py-3.5 text-base font-bold text-paper transition hover:bg-navy-700"
       >
-        <label htmlFor="name" className="text-sm font-bold text-navy">
-          Student&apos;s first name <span className="font-normal text-muted">(optional, used on the report)</span>
-        </label>
-        <input
-          id="name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          maxLength={40}
-          autoComplete="given-name"
-          placeholder="e.g. Aarav"
-          className="mt-2 w-full rounded-xl border border-paper-300 bg-white px-4 py-3 text-base outline-none focus:border-saffron"
-        />
-        <button
-          type="submit"
-          className="mt-5 w-full rounded-xl bg-navy px-6 py-3.5 text-base font-bold text-paper transition hover:bg-navy-700"
-        >
-          Start the test
-        </button>
-      </form>
+        Start, {student.firstName}
+      </button>
     </div>
   );
 }
@@ -104,7 +92,10 @@ function Timer({ elapsed, target }: { elapsed: number; target: number }) {
 
 export default function TestPage() {
   const router = useRouter();
-  const [name, setName] = useState<string | null>(null);
+  const { testId } = useParams<{ testId: string }>();
+  const test = getTest(testId);
+  const testQuestions = test?.questions ?? [];
+  const [started, setStarted] = useState(false);
   const [idx, setIdx] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<Confidence | null>(null);
@@ -115,7 +106,6 @@ export default function TestPage() {
   const testStartedAt = useRef<string>("");
 
   const q = testQuestions[idx];
-  const started = name !== null;
 
   useEffect(() => {
     if (!started || finishing) return;
@@ -126,7 +116,7 @@ export default function TestPage() {
   }, [idx, started, finishing]);
 
   const next = useCallback(() => {
-    if (!selected || !confidence || finishing) return;
+    if (!selected || !confidence || finishing || !test) return;
     const timeSec = Math.max(1, Math.round((performance.now() - startedAt.current) / 1000));
     responses.current = [...responses.current, { questionId: q.id, selected, timeSec, confidence }];
     if (idx + 1 < testQuestions.length) {
@@ -136,14 +126,22 @@ export default function TestPage() {
       window.scrollTo({ top: 0 });
     } else {
       setFinishing(true);
-      saveAttempt({ studentName: name ?? "", startedAt: testStartedAt.current, responses: responses.current });
-      router.push("/report");
+      const id = newAttemptId();
+      addAttempt({
+        id,
+        testId: test.id,
+        studentName: student.firstName,
+        startedAt: testStartedAt.current,
+        completedAt: new Date().toISOString(),
+        responses: responses.current,
+      });
+      router.push(`/results/${id}`);
     }
-  }, [selected, confidence, finishing, q, idx, name, router]);
+  }, [selected, confidence, finishing, q, idx, router, test, testQuestions.length]);
 
   // Keyboard: 1–4 / A–D choose, S / U confidence, Enter next
   useEffect(() => {
-    if (!started) return;
+    if (!started || !q) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement) return;
       const k = e.key.toLowerCase();
@@ -159,14 +157,25 @@ export default function TestPage() {
     return () => window.removeEventListener("keydown", onKey);
   }, [started, q, next]);
 
+  if (!test) {
+    return (
+      <main className="mx-auto max-w-xl px-4 py-16 text-center sm:px-6">
+        <h1 className="text-2xl font-bold text-navy">We couldn&apos;t find that test</h1>
+        <Link href="/tests" className="mt-4 inline-block font-bold text-saffron-600 underline underline-offset-4">
+          Browse all tests
+        </Link>
+      </main>
+    );
+  }
+
   if (!started) {
     return (
-      <main className="paper-grain min-h-dvh">
-        <SiteHeader />
+      <main className="paper-grain min-h-[calc(100dvh-57px)]">
         <Intro
-          onStart={(n) => {
+          test={test}
+          onStart={() => {
             testStartedAt.current = new Date().toISOString();
-            setName(n);
+            setStarted(true);
           }}
         />
       </main>
@@ -178,15 +187,14 @@ export default function TestPage() {
   const ready = !!selected && !!confidence;
 
   return (
-    <main className="min-h-dvh bg-paper">
-      <SiteHeader
-        right={
-          <span className="text-sm font-semibold text-muted tabular-nums">
+    <main className="bg-paper">
+      <div className="mx-auto max-w-2xl px-4 pt-5 pb-32 sm:px-6">
+        <div className="mb-3 flex items-center justify-between text-sm">
+          <span className="font-bold text-navy">{test.title}</span>
+          <span className="font-semibold text-muted tabular-nums">
             Question <span className="text-navy">{idx + 1}</span> / {testQuestions.length}
           </span>
-        }
-      />
-      <div className="mx-auto max-w-2xl px-4 pb-32 sm:px-6">
+        </div>
         <div className="h-1.5 overflow-hidden rounded-full bg-paper-300" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}>
           <div className="h-full rounded-full bg-saffron transition-all duration-500" style={{ width: `${progress}%` }} />
         </div>

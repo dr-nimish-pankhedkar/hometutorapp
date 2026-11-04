@@ -51,9 +51,13 @@ export interface Response {
 }
 
 export interface Attempt {
+  id: string;
+  testId: string;
   studentName: string;
   startedAt: string;
+  completedAt: string;
   responses: Response[];
+  /** Pre-seeded demo history rather than a test the student took */
   isSample?: boolean;
 }
 
@@ -81,6 +85,8 @@ export interface WrongAnswer {
 
 export interface Report {
   studentName: string;
+  testId: string;
+  testTitle: string;
   score: number;
   total: number;
   percent: number;

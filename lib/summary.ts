@@ -4,6 +4,7 @@ import { ERROR_LABEL, type ErrorType, type Report } from "./types";
 /** Compact, PII-light digest of a report — what the summary (template or Claude) is written from. */
 export interface SummaryInput {
   studentName: string;
+  testTitle: string;
   score: number;
   total: number;
   percent: number;
@@ -19,6 +20,7 @@ export interface SummaryInput {
 export function toSummaryInput(r: Report): SummaryInput {
   return {
     studentName: r.studentName,
+    testTitle: r.testId === "full" ? r.testTitle : `${r.testTitle} topic check`,
     score: r.score,
     total: r.total,
     percent: r.percent,
@@ -58,7 +60,7 @@ export function templateSummary(s: SummaryInput): string {
 
   const tone =
     s.percent >= 75 ? "an excellent result" : s.percent >= 50 ? "a solid base to build on" : "a clear starting point for steady progress";
-  parts.push(`${name} answered ${s.score} of ${s.total} questions correctly (${s.percent}%) on the Chemistry progress check — ${tone}.`);
+  parts.push(`${name} answered ${s.score} of ${s.total} questions correctly (${s.percent}%) on the ${s.testTitle} — ${tone}.`);
 
   // Strengths first
   const strong = s.strengths.topics;

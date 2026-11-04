@@ -4,18 +4,35 @@
 
 AI-enabled home tuition for Physics, Chemistry, Maths and Biology — taught by IIT, NIT and medical specialists.
 
-A proof of concept for TutorIQ, an AI-enabled home-tuition platform for JEE/NEET students. A student takes a 15-question Chemistry progress check. The app then builds a report a parent can read and a tutor can act on. There is no login and no database. The browser computes everything, and the only server code is one optional route handler that calls Claude.
+A proof of concept for TutorIQ, an AI-enabled home-tuition platform for JEE/NEET students. A student logs in, picks a test (the full 15-question Chemistry progress check, or a 3-question check on one topic), and gets a report a parent can read and a tutor can act on. A dashboard tracks progress across tests.
+
+It is a demo: there is one hard-coded student account and no database. Login is checked on the server with a signed, httpOnly session cookie. Test results are saved in the browser's `localStorage`.
 
 Stack: Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · Recharts · Anthropic TypeScript SDK.
 
+## Demo login
+
+| Username | Password |
+|---|---|
+| `aarav` | `tutoriq2026` |
+
+The login page shows these and has a one-click **Sign in as Aarav (demo)** button. They are set in `lib/user.ts`. On first login the account is pre-loaded with two earlier results (labelled **Demo**) so the dashboard has history. **Results → Reset demo data** restores that starting state.
+
 ## Pages
 
-| Route | What it does |
-|---|---|
-| `/` | Landing page: hero, the four subject cards (only Chemistry is live), how it works, the faculty, and a call to action |
-| `/test` | 15 MCQs shown one at a time. Each has a timer and a **Sure / Unsure** toggle. The app records the answer, the time taken and the confidence. Keyboard: 1–4 to choose, S/U for confidence, Enter for the next question |
-| `/report` | Report built from the responses in `sessionStorage`. If no test has been taken in this browser session, it shows a sample student, labelled with a **Demo data** banner |
-| `POST /api/summary` | Writes the parent summary with Claude if `ANTHROPIC_API_KEY` is set. Otherwise it uses the built-in template |
+| Route | Access | What it does |
+|---|---|---|
+| `/` | Public | Landing page: hero, subject cards, how it works, the faculty, and **Student login** |
+| `/login` | Public | Login form plus the demo-account card. Signed-in students are sent to the dashboard |
+| `/dashboard` | Student | Greeting, stats (tests taken, average score, strong topics, latest result), "Where you are now" mastery chart from the latest check in each topic, a recommended next test, score trend, recent results |
+| `/tests` | Student | Test library: the full progress check, five quick topic checks (with last result), and Physics / Maths / Biology marked "Coming soon" |
+| `/tests/[testId]` | Student | Runs a test: one question at a time, with a timer and a **Sure / Unsure** toggle. Keyboard: 1–4 to choose, S/U for confidence, Enter for the next question |
+| `/results` | Student | Every attempt, newest first, with per-topic mini bars |
+| `/results/[attemptId]` | Student | The full report for one attempt (below), with a PDF download |
+| `POST /api/login`, `/api/logout` | — | Set or clear the session cookie |
+| `POST /api/summary` | — | Writes the parent summary with Claude if `ANTHROPIC_API_KEY` is set. Otherwise it uses the built-in template |
+
+`proxy.ts` (Next.js 16's renamed middleware) redirects logged-out visitors on student pages to `/login?next=…`. The old `/test` and `/report` URLs redirect to `/tests` and `/results`.
 
 ### What the report computes (`lib/analysis.ts`)
 
@@ -31,7 +48,7 @@ Stack: Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · Recharts · A
 
 ## Question bank
 
-`data/questions.json` holds 15 Class 11–12 Chemistry MCQs, 3 for each of these topics: Mole concept, Atomic structure, Thermodynamics, Chemical equilibrium and GOC. Each question has `chapter`, `topic`, `concept`, `difficulty`, `targetSec`, the options (wrong ones carry `errorType` and `why`), `answer` and `explanation`. To change the test, edit this file. No code changes are needed.
+`data/questions.json` holds 15 Class 11–12 Chemistry MCQs, 3 for each of these topics: Mole concept, Atomic structure, Thermodynamics, Chemical equilibrium and GOC. Each question has `chapter`, `topic`, `concept`, `difficulty`, `targetSec`, the options (wrong ones carry `errorType` and `why`), `answer` and `explanation`. `lib/tests.ts` builds the test library from it: one full check plus one quick check per topic. Adding questions or topics to the JSON updates the tests with no other code changes.
 
 ## Run locally
 
@@ -57,8 +74,8 @@ No configuration is needed.
 
 1. Push this repository to GitHub (already done if you're reading this there).
 2. Go to **vercel.com → Add New… → Project** and import the repository.
-3. Vercel detects **Next.js** on its own. Leave the build command, output directory and root directory at their defaults.
-4. *(Optional)* Under **Environment Variables**, add `ANTHROPIC_API_KEY` to get AI-written parent summaries.
+3. Leave the build command, output directory and root directory at their defaults. `vercel.json` pins the framework to Next.js, so it builds correctly even if the project was created with another preset.
+4. *(Optional)* Under **Environment Variables**, add `ANTHROPIC_API_KEY` to get AI-written parent summaries, and `AUTH_SECRET` (any long random string) to sign session cookies with your own secret.
 5. Click **Deploy**. Every later push to the branch redeploys it, and pull requests get preview URLs.
 
 From the CLI instead:
@@ -75,14 +92,21 @@ vercel env add ANTHROPIC_API_KEY
 
 ```
 app/
-  page.tsx               landing
-  test/page.tsx          progress check (client)
-  report/page.tsx        report (client)
-  api/summary/route.ts   Claude-written parent summary (optional)
-  layout.tsx, globals.css  fonts (Domine, Nunito Sans), colour tokens, print CSS
-components/              logo/header, mastery chart
-data/questions.json      question bank
-lib/                     scoring, summary template, sample attempt, storage
+  page.tsx                         landing (public)
+  login/page.tsx                   login (public)
+  (student)/layout.tsx             app shell: top nav, mobile tab bar, account menu
+  (student)/dashboard/page.tsx
+  (student)/tests/page.tsx         test library
+  (student)/tests/[testId]/page.tsx   test runner
+  (student)/results/page.tsx       results history
+  (student)/results/[attemptId]/page.tsx   report
+  api/login, api/logout            session cookie
+  api/summary/route.ts             Claude-written parent summary (optional)
+  layout.tsx, globals.css          fonts (Domine, Nunito Sans), colour tokens, print CSS
+proxy.ts                           protects student routes
+components/                        logo, app shell, mastery chart, score trend
+data/questions.json                question bank
+lib/                               auth, demo user, tests, scoring, progress, summary, storage, seed history
 ```
 
 ## Language guide
@@ -91,4 +115,4 @@ All student- and parent-facing text is encouraging. Use *analyse / analysis / pr
 
 Design tokens: navy `#16233F`, paper `#F7F4EC`, saffron `#E0892B`, teal `#1F6B60`.
 
-> Demo only: responses are kept in the browser's `sessionStorage` and nothing is sent to a server, except the summary request when a key is set. That request carries the first name and the topic scores.
+> Demo only: results are kept in the browser's `localStorage`, so they don't follow the student to another device. Nothing is sent to a server except the login request and, when a key is set, the summary request (first name and topic scores). A real version would swap `lib/storage.ts` for a database and `lib/auth.ts` for a proper identity provider.

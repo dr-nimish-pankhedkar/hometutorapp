@@ -1,15 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { SiteHeader } from "@/components/Brand";
 import { MasteryChart, statusColor } from "@/components/MasteryChart";
 import { analyse, fmtTime } from "@/lib/analysis";
 import { topicById } from "@/lib/bank";
-import { sampleAttempt } from "@/lib/sample";
-import { loadAttempt } from "@/lib/storage";
+import { useAttempts } from "@/lib/storage";
 import { templateSummary, toSummaryInput } from "@/lib/summary";
-import { ERROR_LABEL, type Attempt, type ErrorType, type TopicStatus } from "@/lib/types";
+import { ERROR_LABEL, type ErrorType, type TopicStatus } from "@/lib/types";
+import { student } from "@/lib/user";
 
 const statusPill: Record<TopicStatus, string> = {
   Strong: "bg-teal-100 text-teal",
@@ -48,10 +48,9 @@ function Stat({ label, value, sub }: { label: string; value: React.ReactNode; su
 }
 
 export default function ReportPage() {
-  const [attempt, setAttempt] = useState<Attempt | null>(null);
-  useEffect(() => {
-    setAttempt(loadAttempt() ?? sampleAttempt);
-  }, []);
+  const { attemptId } = useParams<{ attemptId: string }>();
+  const attempts = useAttempts();
+  const attempt = attempts?.find((a) => a.id === attemptId) ?? null;
 
   const report = useMemo(() => (attempt ? analyse(attempt) : null), [attempt]);
   const summaryInput = useMemo(() => (report ? toSummaryInput(report) : null), [report]);
@@ -76,11 +75,22 @@ export default function ReportPage() {
     return () => ctrl.abort();
   }, [summaryInput]);
 
+  if (attempts && !attempt) {
+    return (
+      <main className="mx-auto max-w-xl px-4 py-16 text-center sm:px-6">
+        <h1 className="text-2xl font-bold text-navy">This result isn&apos;t on this device</h1>
+        <p className="mt-2 text-muted">Results are saved in the browser they were taken in.</p>
+        <Link href="/results" className="mt-4 inline-block font-bold text-saffron-600 underline underline-offset-4">
+          See all results
+        </Link>
+      </main>
+    );
+  }
+
   if (!report || !attempt || !summaryInput) {
     return (
-      <main className="min-h-dvh bg-paper">
-        <SiteHeader />
-        <div className="mx-auto max-w-5xl animate-pulse space-y-4 px-4 sm:px-6">
+      <main>
+        <div className="mx-auto max-w-5xl animate-pulse space-y-4 px-4 pt-6 sm:px-6">
           <div className="h-10 rounded-xl bg-paper-200" />
           <div className="h-48 rounded-2xl bg-paper-200" />
           <div className="h-72 rounded-2xl bg-paper-200" />
@@ -91,7 +101,7 @@ export default function ReportPage() {
 
   const summary = ai?.text ?? templateSummary(summaryInput);
   const name = report.studentName || "Student";
-  const dateStr = new Date(attempt.startedAt || Date.now()).toLocaleDateString("en-IN", {
+  const dateStr = new Date(attempt.completedAt || attempt.startedAt).toLocaleDateString("en-IN", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -99,18 +109,19 @@ export default function ReportPage() {
   const totalErrors = report.wrong.length;
 
   return (
-    <main className="min-h-dvh bg-paper print:bg-white">
-      <SiteHeader
-        right={
-          <button
-            onClick={() => window.print()}
-            className="rounded-xl bg-navy px-4 py-2.5 text-sm font-bold text-paper transition hover:bg-navy-700"
-          >
-            <span className="sm:hidden">Download PDF</span>
-            <span className="hidden sm:inline">Download report as PDF</span>
-          </button>
-        }
-      />
+    <main className="print:bg-white">
+      <div className="no-print mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 pt-5 pb-4 sm:px-6">
+        <Link href="/results" className="text-sm font-semibold text-muted hover:text-navy">
+          ← All results
+        </Link>
+        <button
+          onClick={() => window.print()}
+          className="rounded-xl bg-navy px-4 py-2.5 text-sm font-bold text-paper transition hover:bg-navy-700"
+        >
+          <span className="sm:hidden">Download PDF</span>
+          <span className="hidden sm:inline">Download report as PDF</span>
+        </button>
+      </div>
 
       <div className="mx-auto max-w-5xl space-y-5 px-4 pb-16 sm:px-6 print:space-y-3 print:px-0 print:pb-0">
         {/* Demo banner */}
@@ -120,12 +131,12 @@ export default function ReportPage() {
               Demo data
             </span>
             {attempt.isSample
-              ? "You're viewing a sample student's report. Take the test to generate your own."
-              : "Proof-of-concept report, computed in your browser. Nothing is stored."}
+              ? "Pre-loaded demo result so the account isn't empty. Take a test to add your own."
+              : "Proof-of-concept report, computed and saved in this browser only."}
           </p>
           {attempt.isSample && (
-            <Link href="/test" className="no-print shrink-0 font-bold text-saffron-600 underline underline-offset-4">
-              Take the test →
+            <Link href="/tests" className="no-print shrink-0 font-bold text-saffron-600 underline underline-offset-4">
+              Take a test →
             </Link>
           )}
         </div>
@@ -135,11 +146,13 @@ export default function ReportPage() {
           <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-[11px] font-bold tracking-[0.16em] text-teal uppercase">
-                TutorIQ progress report · Chemistry
+                TutorIQ progress report · {report.testId === "full" ? "Chemistry" : `Chemistry · ${report.testTitle}`}
               </p>
-              <h1 className="mt-1.5 text-3xl font-bold text-navy sm:text-4xl">{name}</h1>
+              <h1 className="mt-1.5 text-3xl font-bold text-navy sm:text-4xl">
+                {name === student.firstName ? student.fullName : name}
+              </h1>
               <p className="mt-1 text-sm text-muted">
-                Class 11–12 · JEE / NEET · {dateStr}
+                {student.grade} · {student.target} · {dateStr}
               </p>
             </div>
             <div className="flex items-end gap-2">
@@ -266,7 +279,11 @@ export default function ReportPage() {
           <SectionTitle
             kicker="Tutor plan"
             title="Your next 2-week plan"
-            sub="Two focus areas where focused sessions will lift the score most, with the sub-concepts to cover first."
+            sub={
+              report.focus.length > 1
+                ? "Two focus areas where focused sessions will lift the score most, with the sub-concepts to cover first."
+                : "The sub-concepts your tutor will cover first in this topic."
+            }
           />
           <div className="grid gap-4 md:grid-cols-2 print:grid-cols-2">
             {report.focus.map((f, i) => (
@@ -418,11 +435,11 @@ export default function ReportPage() {
         </Card>
 
         <div className="no-print flex flex-col gap-3 pt-2 sm:flex-row sm:justify-between">
-          <Link href="/" className="rounded-xl px-5 py-3 text-center font-bold text-navy ring-1 ring-navy/20 hover:ring-navy">
-            ← Back to home
+          <Link href="/dashboard" className="rounded-xl px-5 py-3 text-center font-bold text-navy ring-1 ring-navy/20 hover:ring-navy">
+            ← Dashboard
           </Link>
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Link href="/test" className="rounded-xl bg-white px-5 py-3 text-center font-bold text-navy ring-1 ring-paper-300 hover:ring-navy">
+            <Link href={`/tests/${report.testId}`} className="rounded-xl bg-white px-5 py-3 text-center font-bold text-navy ring-1 ring-paper-300 hover:ring-navy">
               Retake test
             </Link>
             <button onClick={() => window.print()} className="rounded-xl bg-saffron px-5 py-3 font-bold text-white hover:bg-saffron-600">

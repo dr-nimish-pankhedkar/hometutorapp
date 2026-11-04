@@ -1,4 +1,5 @@
 import { bank } from "./bank";
+import { getTest } from "./tests";
 import type {
   Attempt,
   Difficulty,
@@ -18,6 +19,8 @@ export function statusFor(mastery: number): TopicStatus {
 }
 
 export function analyse(attempt: Attempt): Report {
+  const test = getTest(attempt.testId) ?? getTest("full")!;
+  const testQs = test.questions;
   const byQ = new Map(attempt.responses.map((r) => [r.questionId, r]));
   const wrong: WrongAnswer[] = [];
   const needsConfirmation: Report["needsConfirmation"] = [];
@@ -27,8 +30,10 @@ export function analyse(attempt: Attempt): Report {
     misread: 0,
   };
 
-  const topics: TopicResult[] = bank.topics.map((topic) => {
-    const qs = bank.questions.filter((q) => q.topic === topic.id);
+  const topics: TopicResult[] = bank.topics
+    .filter((topic) => testQs.some((q) => q.topic === topic.id))
+    .map((topic) => {
+    const qs = testQs.filter((q) => q.topic === topic.id);
     let earned = 0;
     let possible = 0;
     let correct = 0;
@@ -82,7 +87,7 @@ export function analyse(attempt: Attempt): Report {
   });
 
   const score = topics.reduce((s, t) => s + t.correct, 0);
-  const total = bank.questions.length;
+  const total = testQs.length;
   const totalTimeSec = attempt.responses.reduce((s, r) => s + r.timeSec, 0);
 
   // Focus areas first: lowest mastery, then most concepts to revisit, then answers needing confirmation.
@@ -109,14 +114,14 @@ export function analyse(attempt: Attempt): Report {
   const planIds = new Set(focus.map((f) => f.topic.id));
   const byMasteryDesc = [...topics].sort((a, b) => b.mastery - a.mastery).filter((t) => !planIds.has(t.topic.id));
   const strongTopics = byMasteryDesc.filter((t) => t.status !== "Focus area");
-  const correctSure = bank.questions.filter((q) => {
+  const correctSure = testQs.filter((q) => {
     const r = byQ.get(q.id);
     return r && r.selected === q.answer && r.confidence === "sure";
   });
   const strengths: Report["strengths"] = {
     topics: strongTopics.length ? strongTopics : byMasteryDesc.filter((t) => t.mastery > 0).slice(0, 1),
     secureConcepts: correctSure.map((q) => ({ topic: q.topic, concept: q.concept })),
-    onPace: bank.questions.filter((q) => {
+    onPace: testQs.filter((q) => {
       const r = byQ.get(q.id);
       return r && r.selected === q.answer && r.timeSec <= q.targetSec;
     }).length,
@@ -124,6 +129,8 @@ export function analyse(attempt: Attempt): Report {
 
   return {
     studentName: attempt.studentName,
+    testId: test.id,
+    testTitle: test.title,
     score,
     total,
     percent: Math.round((score / total) * 100),

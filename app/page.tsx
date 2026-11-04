@@ -117,10 +117,10 @@ export default function Home() {
       <SiteHeader
         right={
           <Link
-            href="/report"
-            className="text-sm font-semibold text-navy underline decoration-saffron decoration-2 underline-offset-4 hover:text-saffron-600"
+            href="/login"
+            className="rounded-xl bg-navy px-4 py-2.5 text-sm font-bold text-paper transition hover:bg-navy-700"
           >
-            See a sample report
+            Student login
           </Link>
         }
       />
@@ -142,7 +142,7 @@ export default function Home() {
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
             <Link
-              href="/test"
+              href="/dashboard"
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-navy px-6 py-3.5 text-base font-bold text-paper shadow-lg shadow-navy/20 transition hover:bg-navy-700"
             >
               Take a progress check
@@ -150,7 +150,7 @@ export default function Home() {
                 <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </Link>
-            <span className="text-sm text-muted">15 questions · ~15 minutes · no sign-up</span>
+            <span className="text-sm text-muted">Log in · 15 questions · ~15 minutes</span>
           </div>
         </div>
         <PreviewCard />
@@ -192,7 +192,7 @@ export default function Home() {
               return s.active ? (
                 <Link
                   key={s.name}
-                  href="/test"
+                  href="/dashboard"
                   className="group rounded-2xl border-2 border-saffron bg-white p-5 shadow-[0_10px_30px_-18px_rgba(224,137,43,0.8)] transition hover:-translate-y-0.5"
                 >
                   {inner}
@@ -253,17 +253,17 @@ export default function Home() {
       <section className="mx-auto max-w-6xl px-4 py-16 text-center sm:px-6">
         <h2 className="text-3xl font-bold text-navy">See what a progress check reveals</h2>
         <p className="mx-auto mt-2 max-w-xl text-muted">
-          Take the Chemistry progress check yourself — the report is generated instantly in your browser.
+          Log in to the student platform with the demo account, take a test, and see your report instantly.
         </p>
         <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
-          <Link href="/test" className="rounded-xl bg-saffron px-6 py-3.5 font-bold text-white transition hover:bg-saffron-600">
+          <Link href="/dashboard" className="rounded-xl bg-saffron px-6 py-3.5 font-bold text-white transition hover:bg-saffron-600">
             Take a progress check
           </Link>
           <Link
-            href="/report"
+            href="/login"
             className="rounded-xl border border-navy/20 bg-white px-6 py-3.5 font-bold text-navy transition hover:border-navy"
           >
-            View sample report
+            Student login
           </Link>
         </div>
       </section>
@@ -271,7 +271,7 @@ export default function Home() {
       <footer className="border-t border-paper-300">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-8 text-sm text-muted sm:flex-row sm:px-6">
           <Logo />
-          <p>Demo preview for partners · No data is stored</p>
+          <p>Demo preview for partners · Demo account: aarav / tutoriq2026</p>
         </div>
       </footer>
     </main>
