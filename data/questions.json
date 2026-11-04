@@ -1,0 +1,318 @@
+{
+  "subject": "Chemistry",
+  "level": "Class 11–12 · JEE / NEET",
+  "topics": [
+    {
+      "id": "mole",
+      "name": "Mole concept",
+      "chapter": "Some Basic Concepts of Chemistry",
+      "focusConcepts": [
+        "Mole ↔ mass ↔ particle conversions",
+        "Limiting reagent and percentage yield",
+        "Empirical vs molecular formula",
+        "Equivalent concept and n-factor in redox titrations"
+      ]
+    },
+    {
+      "id": "atomic",
+      "name": "Atomic structure",
+      "chapter": "Structure of Atom",
+      "focusConcepts": [
+        "Quantum numbers and orbital capacity",
+        "Bohr model energy for hydrogen-like species (Z² / n²)",
+        "Rydberg formula and spectral series",
+        "Radial and angular nodes"
+      ]
+    },
+    {
+      "id": "thermo",
+      "name": "Thermodynamics",
+      "chapter": "Thermodynamics",
+      "focusConcepts": [
+        "First law: ΔU, q and w sign conventions",
+        "ΔH − ΔU = Δn₍g₎RT",
+        "Gibbs energy and temperature of spontaneity",
+        "Isothermal vs adiabatic processes"
+      ]
+    },
+    {
+      "id": "equilibrium",
+      "name": "Chemical equilibrium",
+      "chapter": "Equilibrium",
+      "focusConcepts": [
+        "Kp–Kc relation via Δn₍g₎",
+        "Le Chatelier's principle (inert gas, pressure, temperature)",
+        "ICE tables and degree of dissociation",
+        "Reaction quotient Q vs K"
+      ]
+    },
+    {
+      "id": "goc",
+      "name": "GOC",
+      "chapter": "Organic Chemistry – Some Basic Principles",
+      "focusConcepts": [
+        "Inductive effect and acid strength",
+        "Hyperconjugation and carbocation stability",
+        "Resonance and lone-pair availability",
+        "Basicity of amines in aqueous solution (solvation)"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "topic": "mole",
+      "chapter": "Some Basic Concepts of Chemistry",
+      "concept": "Mole–mass conversion",
+      "difficulty": "easy",
+      "targetSec": 45,
+      "text": "How many moles of oxygen atoms are present in 4.4 g of CO₂? (Molar mass of CO₂ = 44 g mol⁻¹)",
+      "options": [
+        { "id": "a", "text": "0.1 mol", "errorType": "misread", "why": "0.1 mol is the amount of CO₂ molecules, not O atoms." },
+        { "id": "b", "text": "0.2 mol" },
+        { "id": "c", "text": "0.4 mol", "errorType": "calculation slip", "why": "Doubled twice — each CO₂ has 2 O atoms, so 0.1 × 2 = 0.2." },
+        { "id": "d", "text": "0.05 mol", "errorType": "concept gap", "why": "Divided by the number of atoms instead of multiplying." }
+      ],
+      "answer": "b",
+      "explanation": "n(CO₂) = 4.4 / 44 = 0.1 mol. Each molecule has 2 O atoms, so n(O) = 0.2 mol."
+    },
+    {
+      "id": "q2",
+      "topic": "mole",
+      "chapter": "Some Basic Concepts of Chemistry",
+      "concept": "Limiting reagent",
+      "difficulty": "medium",
+      "targetSec": 75,
+      "text": "2 g of H₂ is reacted with 32 g of O₂ to form water (2H₂ + O₂ → 2H₂O). What mass of water is formed?",
+      "options": [
+        { "id": "a", "text": "18 g" },
+        { "id": "b", "text": "36 g", "errorType": "concept gap", "why": "Treated O₂ as limiting; H₂ (1 mol) runs out first." },
+        { "id": "c", "text": "34 g", "errorType": "concept gap", "why": "Added reactant masses — O₂ is in excess and 16 g of it remains." },
+        { "id": "d", "text": "9 g", "errorType": "calculation slip", "why": "Halved the moles of water; 1 mol H₂ gives 1 mol H₂O." }
+      ],
+      "answer": "a",
+      "explanation": "n(H₂) = 1 mol, n(O₂) = 1 mol. 1 mol H₂ needs only 0.5 mol O₂, so H₂ is limiting and gives 1 mol H₂O = 18 g."
+    },
+    {
+      "id": "q3",
+      "topic": "mole",
+      "chapter": "Some Basic Concepts of Chemistry",
+      "concept": "n-factor in redox titration",
+      "difficulty": "hard",
+      "targetSec": 105,
+      "text": "What volume of 0.1 M KMnO₄ is required to completely oxidise 50 mL of 0.5 M FeSO₄ in acidic medium?",
+      "options": [
+        { "id": "a", "text": "250 mL", "errorType": "concept gap", "why": "Ignored the 1 : 5 MnO₄⁻ : Fe²⁺ stoichiometry (n-factor 5 vs 1)." },
+        { "id": "b", "text": "50 mL" },
+        { "id": "c", "text": "5 mL", "errorType": "calculation slip", "why": "Decimal slip in litres → mL: 0.005 mol / 0.1 M = 0.05 L = 50 mL." },
+        { "id": "d", "text": "25 mL", "errorType": "misread", "why": "Used 0.2 M for KMnO₄ instead of the given 0.1 M." }
+      ],
+      "answer": "b",
+      "explanation": "n(Fe²⁺) = 0.025 mol. MnO₄⁻ + 5Fe²⁺ → … so n(MnO₄⁻) = 0.005 mol. V = 0.005 / 0.1 = 0.05 L = 50 mL."
+    },
+    {
+      "id": "q4",
+      "topic": "atomic",
+      "chapter": "Structure of Atom",
+      "concept": "Quantum numbers and orbital capacity",
+      "difficulty": "easy",
+      "targetSec": 45,
+      "text": "What is the maximum number of electrons that can have n = 3 and l = 2?",
+      "options": [
+        { "id": "a", "text": "18", "errorType": "misread", "why": "18 is the capacity of the whole n = 3 shell, not the 3d subshell." },
+        { "id": "b", "text": "5", "errorType": "concept gap", "why": "5 is the number of 3d orbitals; each holds 2 electrons." },
+        { "id": "c", "text": "10" },
+        { "id": "d", "text": "6", "errorType": "concept gap", "why": "6 is the capacity of a p subshell (l = 1)." }
+      ],
+      "answer": "c",
+      "explanation": "l = 2 is a d subshell with 2l + 1 = 5 orbitals, each holding 2 electrons → 10."
+    },
+    {
+      "id": "q5",
+      "topic": "atomic",
+      "chapter": "Structure of Atom",
+      "concept": "Bohr energy for hydrogen-like species",
+      "difficulty": "medium",
+      "targetSec": 75,
+      "text": "The energy of the electron in the second Bohr orbit of He⁺ is (E₁ for H = −13.6 eV):",
+      "options": [
+        { "id": "a", "text": "−3.4 eV", "errorType": "concept gap", "why": "Forgot the Z² factor — that is the value for hydrogen." },
+        { "id": "b", "text": "−54.4 eV", "errorType": "misread", "why": "Used n = 1 instead of the second orbit." },
+        { "id": "c", "text": "−27.2 eV", "errorType": "calculation slip", "why": "Multiplied by Z instead of Z²." },
+        { "id": "d", "text": "−13.6 eV" }
+      ],
+      "answer": "d",
+      "explanation": "Eₙ = −13.6 Z²/n² = −13.6 × 4 / 4 = −13.6 eV."
+    },
+    {
+      "id": "q6",
+      "topic": "atomic",
+      "chapter": "Structure of Atom",
+      "concept": "Rydberg formula and spectral series",
+      "difficulty": "hard",
+      "targetSec": 105,
+      "text": "The first line of the Balmer series of hydrogen has λ = 656 nm. What is λ for the first Balmer line of Li²⁺?",
+      "options": [
+        { "id": "a", "text": "72.9 nm" },
+        { "id": "b", "text": "218.7 nm", "errorType": "concept gap", "why": "Used 1/λ ∝ Z instead of Z²." },
+        { "id": "c", "text": "5904 nm", "errorType": "concept gap", "why": "Multiplied by Z²; wavelength is inversely proportional to Z²." },
+        { "id": "d", "text": "164 nm", "errorType": "calculation slip", "why": "Divided by 4 instead of Z² = 9." }
+      ],
+      "answer": "a",
+      "explanation": "1/λ ∝ Z² for the same transition, so λ(Li²⁺) = 656 / 9 ≈ 72.9 nm."
+    },
+    {
+      "id": "q7",
+      "topic": "thermo",
+      "chapter": "Thermodynamics",
+      "concept": "First law: ΔU in isothermal processes",
+      "difficulty": "easy",
+      "targetSec": 45,
+      "text": "For the isothermal reversible expansion of an ideal gas, the change in internal energy ΔU is:",
+      "options": [
+        { "id": "a", "text": "Positive, since heat is absorbed", "errorType": "concept gap", "why": "Heat absorbed equals work done; U of an ideal gas depends only on T." },
+        { "id": "b", "text": "Zero" },
+        { "id": "c", "text": "nRT ln(V₂/V₁)", "errorType": "concept gap", "why": "That expression is q (= −w), not ΔU." },
+        { "id": "d", "text": "Negative, since the gas does work", "errorType": "misread", "why": "True for an adiabatic expansion — the question says isothermal." }
+      ],
+      "answer": "b",
+      "explanation": "For an ideal gas U depends only on temperature. Isothermal ⇒ ΔT = 0 ⇒ ΔU = 0."
+    },
+    {
+      "id": "q8",
+      "topic": "thermo",
+      "chapter": "Thermodynamics",
+      "concept": "ΔH − ΔU = Δn₍g₎RT",
+      "difficulty": "hard",
+      "targetSec": 105,
+      "text": "For N₂(g) + 3H₂(g) → 2NH₃(g) at 300 K, the value of ΔH − ΔU is (R = 8.314 J K⁻¹ mol⁻¹):",
+      "options": [
+        { "id": "a", "text": "+4.99 kJ", "errorType": "calculation slip", "why": "Sign error — Δn₍g₎ = 2 − 4 = −2." },
+        { "id": "b", "text": "−2.49 kJ", "errorType": "misread", "why": "Took Δn₍g₎ = −1; there are 4 mol of gaseous reactants." },
+        { "id": "c", "text": "−4.99 kJ" },
+        { "id": "d", "text": "−7.48 kJ", "errorType": "concept gap", "why": "Counted only H₂; Δn₍g₎ = moles of gaseous products − reactants." }
+      ],
+      "answer": "c",
+      "explanation": "Δn₍g₎ = 2 − 4 = −2. ΔH − ΔU = −2 × 8.314 × 300 J ≈ −4.99 kJ."
+    },
+    {
+      "id": "q9",
+      "topic": "thermo",
+      "chapter": "Thermodynamics",
+      "concept": "Gibbs energy and spontaneity",
+      "difficulty": "medium",
+      "targetSec": 75,
+      "text": "A reaction has ΔH = +30 kJ mol⁻¹ and ΔS = +100 J K⁻¹ mol⁻¹. Above what temperature does it become spontaneous?",
+      "options": [
+        { "id": "a", "text": "0.3 K", "errorType": "calculation slip", "why": "kJ and J not reconciled — convert ΔH to 30 000 J first." },
+        { "id": "b", "text": "300 K" },
+        { "id": "c", "text": "3000 K", "errorType": "calculation slip", "why": "Extra factor of 10 in the unit conversion." },
+        { "id": "d", "text": "It is never spontaneous", "errorType": "concept gap", "why": "With ΔH > 0 and ΔS > 0, ΔG < 0 at high T." }
+      ],
+      "answer": "b",
+      "explanation": "ΔG = ΔH − TΔS < 0 ⇒ T > ΔH/ΔS = 30 000 / 100 = 300 K."
+    },
+    {
+      "id": "q10",
+      "topic": "equilibrium",
+      "chapter": "Equilibrium",
+      "concept": "Kp–Kc relation",
+      "difficulty": "easy",
+      "targetSec": 45,
+      "text": "For N₂(g) + 3H₂(g) ⇌ 2NH₃(g), the relation between Kp and Kc is:",
+      "options": [
+        { "id": "a", "text": "Kp = Kc(RT)²", "errorType": "calculation slip", "why": "Sign of Δn₍g₎ flipped; Δn₍g₎ = −2." },
+        { "id": "b", "text": "Kp = Kc", "errorType": "concept gap", "why": "Only true when Δn₍g₎ = 0." },
+        { "id": "c", "text": "Kp = Kc(RT)⁻²" },
+        { "id": "d", "text": "Kp = Kc(RT)⁻¹", "errorType": "concept gap", "why": "Δn₍g₎ is products − reactants = 2 − 4 = −2." }
+      ],
+      "answer": "c",
+      "explanation": "Kp = Kc(RT)^Δn with Δn₍g₎ = 2 − 4 = −2."
+    },
+    {
+      "id": "q11",
+      "topic": "equilibrium",
+      "chapter": "Equilibrium",
+      "concept": "Le Chatelier's principle – inert gas",
+      "difficulty": "medium",
+      "targetSec": 75,
+      "text": "For PCl₅(g) ⇌ PCl₃(g) + Cl₂(g) at equilibrium, an inert gas is added at constant volume. The equilibrium:",
+      "options": [
+        { "id": "a", "text": "Shifts forward", "errorType": "misread", "why": "That is the constant-pressure case; here the volume is fixed." },
+        { "id": "b", "text": "Shifts backward", "errorType": "concept gap", "why": "Partial pressures of reacting species are unchanged." },
+        { "id": "c", "text": "Is not affected" },
+        { "id": "d", "text": "Shifts forward because Kc increases", "errorType": "concept gap", "why": "K changes only with temperature." }
+      ],
+      "answer": "c",
+      "explanation": "At constant volume, concentrations / partial pressures of reactants and products do not change, so Q = K and nothing shifts."
+    },
+    {
+      "id": "q12",
+      "topic": "equilibrium",
+      "chapter": "Equilibrium",
+      "concept": "ICE tables",
+      "difficulty": "hard",
+      "targetSec": 105,
+      "text": "2 mol of HI is placed in a 1 L flask. At equilibrium (2HI ⇌ H₂ + I₂), 0.4 mol of H₂ is present. What is Kc?",
+      "options": [
+        { "id": "a", "text": "0.063", "errorType": "concept gap", "why": "Subtracted 0.4 from HI; 2 mol HI is consumed per mol H₂ formed." },
+        { "id": "b", "text": "0.11" },
+        { "id": "c", "text": "0.13", "errorType": "calculation slip", "why": "Forgot to square [HI] in the denominator." },
+        { "id": "d", "text": "9.0", "errorType": "misread", "why": "Wrote Kc for the reverse reaction H₂ + I₂ ⇌ 2HI." }
+      ],
+      "answer": "b",
+      "explanation": "[H₂] = [I₂] = 0.4, [HI] = 2 − 0.8 = 1.2. Kc = (0.4 × 0.4) / 1.2² = 0.16 / 1.44 ≈ 0.11."
+    },
+    {
+      "id": "q13",
+      "topic": "goc",
+      "chapter": "Organic Chemistry – Some Basic Principles",
+      "concept": "Carbocation stability",
+      "difficulty": "easy",
+      "targetSec": 45,
+      "text": "Which carbocation is the most stable?",
+      "options": [
+        { "id": "a", "text": "CH₃⁺", "errorType": "misread", "why": "That is the least stable — no hyperconjugation." },
+        { "id": "b", "text": "CH₃CH₂⁺", "errorType": "concept gap", "why": "Primary: only 3 α-H for hyperconjugation." },
+        { "id": "c", "text": "(CH₃)₂CH⁺", "errorType": "concept gap", "why": "Secondary: 6 α-H, fewer than tertiary." },
+        { "id": "d", "text": "(CH₃)₃C⁺" }
+      ],
+      "answer": "d",
+      "explanation": "Tertiary carbocation has 9 α-hydrogens for hyperconjugation and +I from three methyl groups."
+    },
+    {
+      "id": "q14",
+      "topic": "goc",
+      "chapter": "Organic Chemistry – Some Basic Principles",
+      "concept": "Inductive effect and acid strength",
+      "difficulty": "medium",
+      "targetSec": 75,
+      "text": "Which of the following is the strongest acid?",
+      "options": [
+        { "id": "a", "text": "CCl₃COOH" },
+        { "id": "b", "text": "CHCl₂COOH", "errorType": "concept gap", "why": "−I effect is cumulative; three Cl beat two." },
+        { "id": "c", "text": "CH₂ClCOOH", "errorType": "concept gap", "why": "Only one −I group stabilising the carboxylate." },
+        { "id": "d", "text": "CH₃COOH", "errorType": "misread", "why": "That is the weakest acid of the set." }
+      ],
+      "answer": "a",
+      "explanation": "Three Cl atoms exert the strongest −I effect, best stabilising the carboxylate anion."
+    },
+    {
+      "id": "q15",
+      "topic": "goc",
+      "chapter": "Organic Chemistry – Some Basic Principles",
+      "concept": "Basicity of amines in water",
+      "difficulty": "hard",
+      "targetSec": 105,
+      "text": "Which is the strongest base in aqueous solution?",
+      "options": [
+        { "id": "a", "text": "(CH₃)₃N", "errorType": "concept gap", "why": "Gas-phase order; in water, poor solvation of the 3° ammonium ion lowers basicity." },
+        { "id": "b", "text": "(CH₃)₂NH" },
+        { "id": "c", "text": "C₆H₅NH₂", "errorType": "concept gap", "why": "The lone pair is delocalised into the ring — aniline is a weak base." },
+        { "id": "d", "text": "NH₃", "errorType": "misread", "why": "No +I alkyl groups — weaker than the methylamines." }
+      ],
+      "answer": "b",
+      "explanation": "In water, +I effect, solvation and steric factors balance out to make the 2° amine (CH₃)₂NH the strongest base."
+    }
+  ]
+}
